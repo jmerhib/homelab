@@ -20,4 +20,11 @@ spec:
       - image: ghcr.io/mealie-recipes/mealie:v3.2.0
         name: mealie
         resources: {}
+        volumeMounts:
+        - mountPath: "/app/data"
+          name: mealie-data
+      volumes:
+        - name: mealie-data
+          persistentVolumeClaim:
+            claimName: mealie-data
 status: {}
