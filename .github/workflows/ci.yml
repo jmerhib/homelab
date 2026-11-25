@@ -16,20 +16,38 @@ jobs:
       - name: compose config
         run: cp .env.example .env && docker compose config -q
 
-  scan:
+  secrets:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: gitleaks (secrets)
-        uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: trivy (config misconfig)
-        uses: aquasecurity/trivy-action@v0.36.0
+
+  images:
+    runs-on: ubuntu-latest
+    outputs:
+      list: ${{ steps.l.outputs.list }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: l
+        run: |
+          cp .env.example .env
+          echo "list=$(docker compose config --images | jq -R . | jq -sc .)" >> "$GITHUB_OUTPUT"
+
+  trivy:
+    needs: images
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.images.outputs.list) }}
+    steps:
+      - uses: aquasecurity/trivy-action@v0.36.0
         with:
-          scan-type: config
-          scan-ref: .
-          severity: HIGH,CRITICAL
-          exit-code: "0"   # shortcut: report-only, flip to 1 once findings are triaged
+          image-ref: ${{ matrix.image }}
+          severity: CRITICAL
+          ignore-unfixed: true   # only fail on criticals that have a fix available
+          exit-code: "1"

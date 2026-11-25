@@ -1,5 +1,7 @@
 # bee01 homelab stack
 
+[![ci](https://github.com/jmerhib/homelab/actions/workflows/ci.yml/badge.svg)](https://github.com/jmerhib/homelab/actions/workflows/ci.yml)
+
 Self-hosted media and local-AI stack on a single headless mini PC (Ubuntu, Radeon 780M iGPU), defined as one Docker Compose file.
 
 ```
@@ -27,7 +29,7 @@ docker compose up -d
 
 ## CI
 
-GitHub Actions on every push/PR: `yamllint`, `docker compose config` validation, `gitleaks` secret scan, and a `trivy` config scan. Secrets stay in the untracked `.env`.
+GitHub Actions on every push/PR: `yamllint`, `docker compose config` validation, a `gitleaks` secret scan, and a `trivy` scan of every image in the compose file (fails on fixable CRITICAL CVEs). Secrets stay in the untracked `.env`.
 
 ## Roadmap
 
