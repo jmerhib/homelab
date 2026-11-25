@@ -29,7 +29,7 @@ docker compose up -d
 
 ## CI
 
-GitHub Actions on every push/PR: `yamllint`, `docker compose config` validation, a `gitleaks` secret scan, and a `trivy` scan of every image in the compose file (fails on fixable CRITICAL CVEs). Secrets stay in the untracked `.env`.
+GitHub Actions on every push/PR: `yamllint`, `docker compose config` validation, a `gitleaks` secret scan, and a `trivy` scan of every image in the compose file (report-only, also run weekly). Secrets stay in the untracked `.env`.
 
 ## Roadmap
 
