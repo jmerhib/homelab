@@ -1,0 +1,63 @@
+# bee01 — Plex + local AI stack
+# Location on bee01: ~/stack/compose.yml  (with .env alongside)
+# Start:  docker compose up -d      Logs: docker compose logs -f <service>
+
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    network_mode: host                  # simplest for LAN discovery; UI at http://bee01:32400/web
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/New_York
+      - VERSION=docker
+      - PLEX_CLAIM=${PLEX_CLAIM}        # from https://plex.tv/claim — only needed on first start
+    devices:
+      - /dev/dri:/dev/dri               # Radeon 780M for hardware transcoding (needs Plex Pass)
+    volumes:
+      - plex_config:/config
+      - /srv/media:/media
+    tmpfs:
+      - /transcode:size=4g              # in-RAM transcode scratch; set Plex > Settings > Transcoder dir to /transcode
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:rocm
+    container_name: ollama
+    ports:
+      - "11434:11434"                   # API for anything else on the LAN
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    group_add:
+      - "${VIDEO_GID}"
+      - "${RENDER_GID}"
+    environment:
+      - HSA_OVERRIDE_GFX_VERSION=11.0.2  # 780M (gfx1103) isn't on ROCm's official list; try 11.0.0 if this fails
+      - OLLAMA_IGPU_ENABLE=1             # Ollama skips integrated GPUs by default; the 780M is the only GPU here
+      - OLLAMA_KEEP_ALIVE=30m
+      - OLLAMA_CONTEXT_LENGTH=32768      # Claude Code's prompt alone is ~20k tokens; the 4096 default truncates it
+      - OLLAMA_FLASH_ATTENTION=1         # needed for the quantized KV cache below
+      - OLLAMA_KV_CACHE_TYPE=q8_0        # halves KV-cache memory so qwen3:14b + 32k context fits in the 780M's ~13 GB
+    volumes:
+      - ollama:/root/.ollama            # models live on the 830G docker disk
+    restart: unless-stopped
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    ports:
+      - "3000:8080"                     # chat UI at http://bee01:3000
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - open-webui:/app/backend/data
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  plex_config:
+  ollama:
+  open-webui:
