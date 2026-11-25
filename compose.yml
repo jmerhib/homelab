@@ -4,7 +4,7 @@
 
 services:
   plex:
-    image: lscr.io/linuxserver/plex:latest
+    image: lscr.io/linuxserver/plex:1.43.5.11079-b3b13e506-ls334@sha256:31e4c2de666cd130bc389133b6c63af08912559d992370e52822f8f229185aef
     container_name: plex
     network_mode: host                  # simplest for LAN discovery; UI at http://bee01:32400/web
     environment:
@@ -23,7 +23,7 @@ services:
     restart: unless-stopped
 
   ollama:
-    image: ollama/ollama:rocm
+    image: ollama/ollama:0.40.18-rocm@sha256:ab28cc8337abd53e03d21a3d160f3fff2e798ff13d0eb6125284622f9074e5ac
     container_name: ollama
     ports:
       - "11434:11434"                   # API for anything else on the LAN
@@ -45,7 +45,7 @@ services:
     restart: unless-stopped
 
   open-webui:
-    image: ghcr.io/open-webui/open-webui:main
+    image: ghcr.io/open-webui/open-webui:main@sha256:d6c085678f7e3f474aa2a92ac9831cb68759dcfd951de250ebbb37dac5cd0255   # no release tag matches this build; digest pins it
     container_name: open-webui
     ports:
       - "3000:8080"                     # chat UI at http://bee01:3000
