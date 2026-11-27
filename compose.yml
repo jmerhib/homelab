@@ -16,7 +16,7 @@ services:
     devices:
       - /dev/dri:/dev/dri               # Radeon 780M for hardware transcoding (needs Plex Pass)
     volumes:
-      - plex_config:/config
+      - plex-config:/config
       - /srv/media:/media
     tmpfs:
       - /transcode:size=4g              # in-RAM transcode scratch; set Plex > Settings > Transcoder dir to /transcode
@@ -88,15 +88,15 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     volumes:
-      - grafana_data:/var/lib/grafana
+      - grafana-data:/var/lib/grafana
       - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
       - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
     restart: unless-stopped
 
 volumes:
-  plex_config:
+  plex-config:
   ollama:
   open-webui:
   prometheus-data:
-  grafana_data:
+  grafana-data:
