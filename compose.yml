@@ -66,9 +66,25 @@ services:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  node_exporter:
+    image: prom/node-exporter:v1.13.1@sha256:7296504d4ada44b7d7ab4431e27e9f9900d8488f8d55842f4b12ae2704e16dfe
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
+    command:
+      - "--path.rootfs=/host"
+    network_mode: host
+    pid: host
+    volumes:
+      - "/:/host:ro,rslave"
+    restart: unless-stopped
 
 volumes:
   plex_config:
   ollama:
   open-webui:
   prometheus-data:
+  host:
