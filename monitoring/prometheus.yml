@@ -5,11 +5,10 @@ global:
 alerting:
   alertmanagers:
     - static_configs:
-        - targets:
-        # - alertmanager:9093
+        - targets: ["alertmanager:9093"]
 
 rule_files:
-# - "first_rules.yml"
+  - "/etc/prometheus/alerts.yml"
 
 # Scraping configuration
 scrape_configs:
